@@ -27,8 +27,8 @@ func main() {
 	godotenv.Load()
 
 	// CLI flags
-	count := flag.Int("count", 5, "Number of random keywords to search")
-	maxResults := flag.Int("max", 10, "Max results per keyword")
+	count := flag.Int("count", 20, "Number of random keywords to search")
+	maxResults := flag.Int("max", 50, "Max results per keyword")
 	keywordsFile := flag.String("keywords", defaultKeywordsFile, "Path to keywords JSON file")
 	storageType := flag.String("storage", "", "Storage adapter: csv, sqlite, postgres")
 	output := flag.String("output", "", "Output file for CSV storage")

@@ -92,6 +92,59 @@ func (c *Client) GetPlaylistItems(playlistID, pageToken string) (*PlaylistRespon
 	return &result, nil
 }
 
+// GetChannel calls channels.list. Quota cost: 1 unit per call.
+func (c *Client) GetChannel(channelID string) (*ChannelResponse, error) {
+	params := url.Values{
+		"part": {"snippet,contentDetails"},
+		"id":   {channelID},
+		"key":  {c.apiKey},
+	}
+
+	resp, err := c.httpClient.Get(baseURL + "/channels?" + params.Encode())
+	if err != nil {
+		return nil, fmt.Errorf("channel request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("channel API returned status %d", resp.StatusCode)
+	}
+
+	var result ChannelResponse
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, fmt.Errorf("decode channel response: %w", err)
+	}
+	return &result, nil
+}
+
+// GetAllPlaylistItems fetches all video IDs from a playlist with pagination.
+// Quota cost: 1 unit per page (50 items per page).
+func (c *Client) GetAllPlaylistItems(playlistID string, maxVideos int) ([]string, error) {
+	var allIDs []string
+	pageToken := ""
+
+	for {
+		resp, err := c.GetPlaylistItems(playlistID, pageToken)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, item := range resp.Items {
+			allIDs = append(allIDs, item.ContentDetails.VideoID)
+			if maxVideos > 0 && len(allIDs) >= maxVideos {
+				return allIDs, nil
+			}
+		}
+
+		if resp.NextPageToken == "" {
+			break
+		}
+		pageToken = resp.NextPageToken
+	}
+
+	return allIDs, nil
+}
+
 func (c *Client) get(endpoint string, params url.Values) (*APIResponse, error) {
 	resp, err := c.httpClient.Get(baseURL + "/" + endpoint + "?" + params.Encode())
 	if err != nil {

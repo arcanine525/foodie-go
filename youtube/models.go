@@ -85,3 +85,19 @@ type PlaylistResponse struct {
 	} `json:"items"`
 	NextPageToken string `json:"nextPageToken"`
 }
+
+// ChannelResponse for channels.list.
+type ChannelResponse struct {
+	Items []struct {
+		ID            string `json:"id"`
+		Snippet       struct {
+			Title       string `json:"title"`
+			Description string `json:"description"`
+		} `json:"snippet"`
+		ContentDetails struct {
+			RelatedPlaylists struct {
+				Uploads string `json:"uploads"`
+			} `json:"relatedPlaylists"`
+		} `json:"contentDetails"`
+	} `json:"items"`
+}
